@@ -1,0 +1,42 @@
+/* src/components/BioForm/BioForm.css */
+
+.bio-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 300px;
+    margin: 20px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.bio-form .form-group {
+    margin-bottom: 15px;
+}
+
+.bio-form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.bio-form input,
+.bio-form select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+
+.bio-form button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.bio-form button:hover {
+    background-color: #0056b3;
+}
