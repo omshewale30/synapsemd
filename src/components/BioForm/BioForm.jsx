@@ -1,3 +1,4 @@
+// src/components/BioForm/BioForm.jsx
 import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,8 +11,9 @@ import { AlertCircle } from 'lucide-react';
 const BioForm = ({ onBioDataChange }) => {
     const [formData, setFormData] = useState({
         age: '',
-        weight: '',
-        height: '',
+        weight: '', // In pounds to match Home.jsx prompt
+        heightFeet: '', // Split height into feet
+        heightInches: '', // and inches
         sex: ''
     });
 
@@ -20,22 +22,30 @@ const BioForm = ({ onBioDataChange }) => {
     const validateForm = () => {
         const newErrors = {};
 
-        if (formData.age) {
-            if (formData.age < 0 || formData.age > 120) {
-                newErrors.age = 'Please enter a valid age between 0 and 120';
-            }
+        if (!formData.age) {
+            newErrors.age = 'Age is required';
+        } else if (formData.age < 0 || formData.age > 120) {
+            newErrors.age = 'Age must be between 0 and 120';
         }
 
-        if (formData.weight) {
-            if (formData.weight < 0 || formData.weight > 500) {
-                newErrors.weight = 'Please enter a valid weight between 0 and 500 kg';
-            }
+        if (!formData.weight) {
+            newErrors.weight = 'Weight is required';
+        } else if (formData.weight < 0 || formData.weight > 1000) {
+            newErrors.weight = 'Weight must be between 0 and 1000 lbs';
         }
 
-        if (formData.height) {
-            if (formData.height < 0 || formData.height > 300) {
-                newErrors.height = 'Please enter a valid height between 0 and 300 cm';
-            }
+        if (!formData.heightFeet) {
+            newErrors.heightFeet = 'Height (feet) is required';
+        } else if (formData.heightFeet < 0 || formData.heightFeet > 9) {
+            newErrors.heightFeet = 'Feet must be between 0 and 9';
+        }
+
+        if (formData.heightInches && (formData.heightInches < 0 || formData.heightInches >= 12)) {
+            newErrors.heightInches = 'Inches must be between 0 and 11';
+        }
+
+        if (!formData.sex) {
+            newErrors.sex = 'Sex is required';
         }
 
         setErrors(newErrors);
@@ -45,99 +55,124 @@ const BioForm = ({ onBioDataChange }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         if (validateForm()) {
-            onBioDataChange(formData);
+            const bioData = {
+                age: formData.age,
+                weight: formData.weight,
+                height: `${formData.heightFeet} feet${formData.heightInches ? ` ${formData.heightInches} inches` : ''}`,
+                sex: formData.sex
+            };
+            onBioDataChange(bioData);
         }
     };
 
     const handleInputChange = (field, value) => {
-        setFormData(prev => ({
+        setFormData((prev) => ({
             ...prev,
             [field]: value
         }));
-        // Clear error when user starts typing
         if (errors[field]) {
-            setErrors(prev => ({
+            setErrors((prev) => ({
                 ...prev,
                 [field]: undefined
             }));
         }
     };
 
+    const isFormValid = formData.age && formData.weight && formData.heightFeet && formData.sex;
+
     return (
-        <Card>
+        <Card className="shadow-md">
             <CardHeader>
-                <CardTitle>Patient Information</CardTitle>
+                <CardTitle className="text-2xl">Patient Information</CardTitle>
                 <CardDescription>
-                    Please enter your biographical information for accurate diagnosis
+                    Enter your biographical details for a tailored assessment.
                 </CardDescription>
             </CardHeader>
 
             <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* Age */}
                     <div className="space-y-2">
-                        <Label htmlFor="age">Age</Label>
+                        <Label htmlFor="age">Age (years)</Label>
                         <Input
                             id="age"
                             type="number"
-                            placeholder="Enter your age"
+                            placeholder="e.g., 25"
                             value={formData.age}
                             onChange={(e) => handleInputChange('age', e.target.value)}
-                            className={errors.age ? 'border-red-500' : ''}
+                            className={errors.age ? 'border-destructive' : ''}
                         />
                         {errors.age && (
-                            <Alert variant="destructive">
+                            <Alert variant="destructive" className="mt-2">
                                 <AlertCircle className="h-4 w-4" />
                                 <AlertDescription>{errors.age}</AlertDescription>
                             </Alert>
                         )}
                     </div>
 
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    {/* Weight */}
+                    <div className="space-y-2">
+                        <Label htmlFor="weight">Weight (lbs)</Label>
+                        <Input
+                            id="weight"
+                            type="number"
+                            placeholder="e.g., 150"
+                            value={formData.weight}
+                            onChange={(e) => handleInputChange('weight', e.target.value)}
+                            className={errors.weight ? 'border-destructive' : ''}
+                        />
+                        {errors.weight && (
+                            <Alert variant="destructive" className="mt-2">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription>{errors.weight}</AlertDescription>
+                            </Alert>
+                        )}
+                    </div>
+
+                    {/* Height (Feet and Inches) */}
+                    <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="weight">Weight (kg)</Label>
+                            <Label htmlFor="heightFeet">Height (feet)</Label>
                             <Input
-                                id="weight"
+                                id="heightFeet"
                                 type="number"
-                                placeholder="Enter weight"
-                                value={formData.weight}
-                                onChange={(e) => handleInputChange('weight', e.target.value)}
-                                className={errors.weight ? 'border-red-500' : ''}
+                                placeholder="e.g., 5"
+                                value={formData.heightFeet}
+                                onChange={(e) => handleInputChange('heightFeet', e.target.value)}
+                                className={errors.heightFeet ? 'border-destructive' : ''}
                             />
-                            {errors.weight && (
-                                <Alert variant="destructive">
+                            {errors.heightFeet && (
+                                <Alert variant="destructive" className="mt-2">
                                     <AlertCircle className="h-4 w-4" />
-                                    <AlertDescription>{errors.weight}</AlertDescription>
+                                    <AlertDescription>{errors.heightFeet}</AlertDescription>
                                 </Alert>
                             )}
                         </div>
-
                         <div className="space-y-2">
-                            <Label htmlFor="height">Height (cm)</Label>
+                            <Label htmlFor="heightInches">Height (inches)</Label>
                             <Input
-                                id="height"
+                                id="heightInches"
                                 type="number"
-                                placeholder="Enter height"
-                                value={formData.height}
-                                onChange={(e) => handleInputChange('height', e.target.value)}
-                                className={errors.height ? 'border-red-500' : ''}
+                                placeholder="e.g., 11"
+                                value={formData.heightInches}
+                                onChange={(e) => handleInputChange('heightInches', e.target.value)}
+                                className={errors.heightInches ? 'border-destructive' : ''}
                             />
-                            {errors.height && (
-                                <Alert variant="destructive">
+                            {errors.heightInches && (
+                                <Alert variant="destructive" className="mt-2">
                                     <AlertCircle className="h-4 w-4" />
-                                    <AlertDescription>{errors.height}</AlertDescription>
+                                    <AlertDescription>{errors.heightInches}</AlertDescription>
                                 </Alert>
                             )}
                         </div>
                     </div>
 
+                    {/* Sex */}
                     <div className="space-y-2">
                         <Label htmlFor="sex">Biological Sex</Label>
-                        <Select
-                            value={formData.sex}
-                            onValueChange={(value) => handleInputChange('sex', value)}
-                        >
-                            <SelectTrigger id="sex">
-                                <SelectValue placeholder="Select biological sex" />
+                        <Select value={formData.sex} onValueChange={(value) => handleInputChange('sex', value)}>
+                            <SelectTrigger id="sex" className={errors.sex ? 'border-destructive' : ''}>
+                                <SelectValue placeholder="Select sex" />
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="male">Male</SelectItem>
@@ -145,6 +180,12 @@ const BioForm = ({ onBioDataChange }) => {
                                 <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                         </Select>
+                        {errors.sex && (
+                            <Alert variant="destructive" className="mt-2">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription>{errors.sex}</AlertDescription>
+                            </Alert>
+                        )}
                     </div>
                 </form>
             </CardContent>
@@ -152,8 +193,9 @@ const BioForm = ({ onBioDataChange }) => {
             <CardFooter>
                 <Button
                     type="submit"
-                    onClick={handleSubmit}
+                    disabled={!isFormValid}
                     className="w-full"
+                    onClick={handleSubmit} // Kept for edge cases, but form submission should suffice
                 >
                     Continue
                 </Button>
